@@ -4,3 +4,7 @@
 !*.h
 !README.md
 !.gitignore
+!src/
+!utils/
+!data/
+!board.txt
