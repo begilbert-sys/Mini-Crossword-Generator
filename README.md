@@ -1,6 +1,9 @@
 # Mini Crossword Generator
 <img src="https://i.imgur.com/one4z3k.gif">
+
 *Randomly generating a 7x7 in 0.4 seconds*
+
+
 The [Mini Crossword](https://www.nytimes.com/crosswords/game/mini) is a crossword variant where the boards are much smaller, around 5x5. This project randomly generates unique mini crossword boards.
 
 Generated boards can be customized, pre-filled with letters, and are guaranteed to have no repeated words. 
