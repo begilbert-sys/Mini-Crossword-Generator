@@ -88,7 +88,7 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
         top_node = DP.get({coord.row - 1, coord.column}).down;
     }
 
-    if (left_node->node_array == nullptr || top_node->node_array == nullptr) {
+    if (left_node == nullptr || top_node == nullptr || left_node->node_array == nullptr || top_node->node_array == nullptr) {
         return false;
     }
     
@@ -105,9 +105,9 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
 
         for (const char& letter : outer_node->char_list) {
             int index = letter - 'a';
-            //if (coord.row == 0 && coord.column == 0) {
-                //std::cout << "Letter: " << letter << std::endl;
-            //}
+            if (coord.row == 0 && coord.column == 0) {
+                std::cout << "Letter: " << letter << std::endl;
+            }
             if (inner_node->node_array[index] != nullptr) {
                 board.set(coord, letter);
                 if (final_square) {

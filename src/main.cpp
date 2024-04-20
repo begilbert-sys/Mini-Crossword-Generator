@@ -17,7 +17,7 @@ const std::string DIRECTORY = "/Users/bengilbert/Documents/Mini Crossword Genera
 void run() {
     srand((unsigned) time(NULL));
     auto start = chrono::high_resolution_clock::now();
-    Solver solver(DIRECTORY + "words7.txt");
+    Solver solver(DIRECTORY + "words.txt");
     Board board(DIRECTORY + "board.txt");
     
     auto end = chrono::high_resolution_clock::now();

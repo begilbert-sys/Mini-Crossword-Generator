@@ -9,9 +9,9 @@ The [Mini Crossword](https://www.nytimes.com/crosswords/game/mini) is a crosswor
 Generated boards can be customized, pre-filled with letters, and are guaranteed to have no repeated words. 
 
 ## How to run
-As of right now, this program only works in the CLI, but I'm working on an [in-browser](https://github.com/begilbert-sys/make-your-own-crossy) version using TypeScript. 
+As of right now, this program only works on the command-line, but I'm working on an [in-browser](https://github.com/begilbert-sys/make-your-own-crossy) version using TypeScript. 
 
-The program only generates alphabetical words between lengths 3 and 8. Anything else will be ignored. 
+The program only uses alphabetical words between lengths 3 and 8. Anything else will be ignored (see [limitations](#Limitations) if you'd like to change this).
 
 It requires two files:
 1. `data/wordbank.txt` - a list of all the words you'd like to use for generation. I've provided one by default. 
@@ -31,9 +31,9 @@ This would correspond to the follwing board:
 
 
 ## How it works (general overview)
-The project relies on [tries](https://en.wikipedia.org/wiki/Trie) to procedurally generate words on the board, and [backtracks](https://en.wikipedia.org/wiki/Backtracking) if a generated board is invalid. The board is generated letter-by-letter using the following process:
+The project relies on [tries](https://en.wikipedia.org/wiki/Trie) to procedurally generate words on the board, and [backtracks](https://en.wikipedia.org/wiki/Backtracking) whenever it hits a rut. The board is generated letter-by-letter using the following process:
 
-1. Each filled square keeps two sets of possible "next letters": one for the next letter in the **across** direction and one for the next letter in the **down** direction. 
+1. Using nodes from the tries, each filled square keeps two sets of possible "next letters": one for the next letter in the **across** direction and one for the next letter in the **down** direction. 
     ```
           s
           e
@@ -46,7 +46,7 @@ The project relies on [tries](https://en.wikipedia.org/wiki/Trie) to procedurall
 
     **ACROSS**: COR**D**, COR**E**, COR**K**, COR**N**, COR**P**,
 
-    Note that if there is no set to choose from because the square is adjacent to a border, then the set would consist of every letter in the alphabet. 
+    (Note that if there is no set to choose from because the square is adjacent to a border, then the set would consist of every letter in the alphabet). 
 
 
 2. The square takes the intersection of these two sets:
@@ -59,14 +59,14 @@ The project relies on [tries](https://en.wikipedia.org/wiki/Trie) to procedurall
       e
 c o r D
 ```
-3. The algorithm defers to the next square and waits to hear back. If a board is successfully generated after this point, great. However, if board generation fails, simply try the next letter in the set:
+3. The algorithm defers to the next square and waits to hear back. If a board is successfully generated after this point, great. However, if board generation fails, it tries the next letter in the set:
 ```
       s
       e
       e
 c o r K
 ```
-and defer again onto the next square. 
+and defers again to the next square. 
 
 4. If all letters in the set fail to generate boards, then the function returns `false` and backtracks to the previous square.
 
@@ -74,4 +74,6 @@ and defer again onto the next square.
 This is just the gist, and there are quite a few things done to optimize generation, which are explained in the source code itself. 
 
 ## Limitations 
-Once the algorithm reaches the 7x7 and 8x8 range, it begins to get very slow. Generating a 7x7 board with a good wordbank can take up to a minute. 
+Once the algorithm reaches the 7x7 and 8x8 range, it can get very slow. Generating a 7x7 board with a good wordbank can take up to a minute if you're unlucky, and 8x8s can take an hour. 
+
+Given enough time and memory, the program can theoretically generate boards of any size. But both the memory usage and runtime scale pretty severely so I haven't bothered trying anything bigger than an 8x8. If you'd like to try yourself, the word range is `#define`'d in [solver.h](https://github.com/begilbert-sys/Mini-Crossword-Generator/blob/main/src/solver.h) if you'd like to toy with it.  
