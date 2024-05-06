@@ -1,6 +1,3 @@
-# emscripten Makefile
-# yes I know this Makefile sucks 
-
 FLAGS := -std=c++17 -Wall -Wextra -O3
 srcdir := ./src
 outdir := ./out
@@ -26,3 +23,4 @@ $(outdir):
 
 clean: 
 	rm -rf $(outdir)
+	rm main
