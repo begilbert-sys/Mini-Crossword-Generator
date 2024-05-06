@@ -1,5 +1,5 @@
 # Mini Crossword Generator
-<img src="https://i.imgur.com/one4z3k.gif">
+<img src="https://i.imgur.com/ZycVy0B.gif">
 
 *Randomly generating a 7x7 in 0.4 seconds*
 
@@ -11,7 +11,7 @@ Generated boards can be customized, pre-filled with letters, and are guaranteed 
 ## How to run
 As of right now, this program only works on the command-line, but I'm working on an [in-browser](https://github.com/begilbert-sys/make-your-own-crossy) version using TypeScript. 
 
-The program only uses alphabetical words between lengths 3 and 8. Anything else will be ignored (see [limitations](#Limitations) if you'd like to change this).
+The program only uses alphabetical words between lengths 3 and 8. Anything else will be ignored (see [Limitations](#limitations) if you'd like to change this).
 
 It requires two files:
 1. `data/wordbank.txt` - a list of all the words you'd like to use for generation. I've provided one by default. 
@@ -74,6 +74,7 @@ and defers again to the next square.
 This is just the gist, and there are quite a few things done to optimize generation, which are explained in the source code itself. 
 
 ## Limitations 
-Once the algorithm reaches the 7x7 and 8x8 range, it can get very slow. Generating a 7x7 board with a good wordbank can take up to a minute if you're unlucky, and 8x8s can take an hour. 
+Once you start asking the algorithm to generate boards in the  7x7 and 8x8 range, it can get very slow. Generating a 7x7 board with a good wordbank can take up to a minute if you're unlucky, and 8x8s can take an hour. 
 
-Given enough time and memory, the program can theoretically generate boards of any size. But both the memory usage and runtime scale pretty severely so I haven't bothered trying anything bigger than an 8x8. If you'd like to try yourself, the word range is `#define`'d in [solver.h](https://github.com/begilbert-sys/Mini-Crossword-Generator/blob/main/src/solver.h) if you'd like to toy with it.  
+Given enough time and memory, the program can theoretically generate boards of any size. But both the memory usage and runtime scale pretty severely so I haven't bothered trying anything bigger than an 8x8 and I wouldn't recommend it.
+Nevertheless, if you'd like to toy with the range, it's defined in [solver.h](https://github.com/begilbert-sys/Mini-Crossword-Generator/blob/main/src/solver.h). 

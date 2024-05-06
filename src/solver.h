@@ -8,7 +8,7 @@
 #include "fixedtrie.h"
 #include "matrix.h"
 #include "board.h"
-#include "strutil.h"
+#include "utils/strutil.h"
 
 #define WORD_MIN 3
 #define WORD_MAX 8

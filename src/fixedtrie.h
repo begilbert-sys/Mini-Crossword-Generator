@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <cassert>
 
-#include "strutil.h"
-#include "randutil.h"
+#include "utils/strutil.h"
+#include "utils/randutil.h"
 
 
 /*

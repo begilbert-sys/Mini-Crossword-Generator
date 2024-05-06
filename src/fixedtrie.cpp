@@ -42,7 +42,7 @@ FixedTrie::~FixedTrie() {
 }
 
 void FixedTrie::verify_word(std::string word) {
-    if (word.length() != size) {
+    if ((int)word.length() != size) {
         throw std::invalid_argument("word: \"" + word +  "\" must be length " + std::to_string(size));
     }
     if (!strutil::islower(word)) {
@@ -101,7 +101,7 @@ void FixedTrie::remove(std::string word) {
         int index = letter - 'a';
         if (current_node->node_array != nullptr && current_node->node_array[index] != nullptr) {
             nodes[i] = current_node;
-            current_node = current_node->node_array[letter];
+            current_node = current_node->node_array[index];
         } else {
             throw std::invalid_argument("word: \"" + word +  "\" does not exist in the FixedTrie");
         }

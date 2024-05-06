@@ -1,32 +1,46 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 
 #include "solver.h"
 #include "matrix.h"
 #include "fixedtrie.h"
 #include "board.h"
-#include "randutil.h"
+#include "utils/randutil.h"
 
 
 using namespace std;
-// g++ -g -Wall -Wextra main.cpp fixedtrie.cpp solver.cpp strutil.cpp board.cpp; ./a.exe
 
-const std::string DIRECTORY = "/Users/bengilbert/Documents/Mini Crossword Generator/data/";
+const string DIRECTORY = filesystem::current_path().string();
+
+string read_board(string filename) {
+    cout << filename << endl;
+    ifstream file(filename);
+    string line;
+    string result = "";
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            result += line + '\n';
+        }
+    } else {
+        throw std::invalid_argument("file: \"" + filename + "\" could not be found");
+    }
+    return result;
+
+}
+
 
 void run() {
     srand((unsigned) time(NULL));
+    Solver solver(DIRECTORY + "/data/words.txt");
+    Board board(read_board(DIRECTORY + "/data/board.txt"));
     auto start = chrono::high_resolution_clock::now();
-    Solver solver(DIRECTORY + "words.txt");
-    Board board(DIRECTORY + "board.txt");
-    
+    solver.solve(board);
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-    //cout << "Overhead: " << duration.count() << "ms" << endl;
-    start = chrono::high_resolution_clock::now();
-    solver.solve(board);
-    end = chrono::high_resolution_clock::now();
-    duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     board.display();
     cout << "Elapsed time: " << duration.count() << "ms" << endl;
 }

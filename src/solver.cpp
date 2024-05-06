@@ -105,9 +105,6 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
 
         for (const char& letter : outer_node->char_list) {
             int index = letter - 'a';
-            if (coord.row == 0 && coord.column == 0) {
-                std::cout << "Letter: " << letter << std::endl;
-            }
             if (inner_node->node_array[index] != nullptr) {
                 board.set(coord, letter);
                 if (final_square) {

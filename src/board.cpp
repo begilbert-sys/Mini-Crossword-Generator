@@ -1,57 +1,5 @@
 #include "board.h"
 
-void Board::build_board(std::string filename) {
-    std::ifstream file(filename);
-
-    std::string line;
-    rows = 0;
-    columns = 0;
-    std::vector<std::string> contents;
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            std::string rowstr = "";
-            for (int i = 0; i < line.length(); i++) {
-                char letter = line[i];
-                switch (letter) {
-                    case ' ':
-                        continue;
-                    case BLACKOUT:
-                    case BLANK:
-                        rowstr += letter;
-                        break;
-                    default:
-                        if (!islower(letter)) {
-                            throw std::logic_error(std::string("\"") + letter + "\" is not a valid letter");
-                        }
-                        rowstr += letter;
-                        break;
-                }
-            }
-            contents.push_back(rowstr);
-            rows++;
-            
-            if (columns == 0) {
-                columns = (int)rowstr.length();
-            } else {
-                if (columns != rowstr.length()) {
-                    throw std::logic_error("row: \"" + line + "\" is invalid length");
-                }
-            }
-        }
-        file.close();
-    } else {
-        throw std::invalid_argument("file: \"" + filename + "\" could not be found");
-    }
-
-    boardptr = new Matrix<char>(rows, columns);
-
-    for (int row = 0; row < rows; row++) {
-        for (int col = 0; col < columns; col++) {
-            set({row, col}, contents[row][col]);
-        }
-    }
-}
-
 void Board::build_words(bool is_across) {
     if (is_across) {
         across_words.clear();
@@ -102,8 +50,48 @@ void Board::build_words(bool is_across) {
     }
 }
 
-Board::Board(std::string filename) {
-    build_board(filename);
+Board::Board(std::string board_string) {
+    std::vector<std::string> contents;
+    std::string rowstr = "";
+    for (const char& c : board_string) {
+        switch (c) {
+            case ' ':
+                break;
+
+            case BLANK:
+            case BLACKOUT:
+                rowstr += c;
+                break;
+
+            case '\n':
+                std::cout << rowstr << std::endl;
+                contents.push_back(rowstr);
+                rowstr = "";
+                break;
+
+            default:
+                if (!islower(c)) {
+                    throw new std::logic_error(std::string("\"") + c + "\" is not a valid letter");
+                }
+                rowstr += c;
+                break;
+        }
+    }
+    if (!rowstr.empty()) {
+        contents.push_back(rowstr);
+    }
+    rows = (int)contents.size();
+    columns = (int)contents[0].size();
+    boardptr = new Matrix<char>(rows, columns);
+
+    for (int row = 0; row < rows; row++) {
+        if ((int)contents[row].size() != columns) {
+            throw new std::logic_error("Row \"" + contents[row] + "\" is not a valid length");
+        }
+        for (int col = 0; col < columns; col++) {
+            set({row, col}, contents[row][col]);
+        }
+    }
     build_words(true);
     build_words(false);
 }

@@ -3,12 +3,11 @@
 
 #include <iostream>
 #include <string>
-#include <fstream>
 #include <unordered_map>
 #include <vector>
 
 #include "matrix.h"
-#include "strutil.h"
+#include "utils/strutil.h"
 
 #define BLANK '_'
 #define BLACKOUT '.'
@@ -21,7 +20,7 @@ class Board {
         std::unordered_map<Coordinate, std::string> down_words;
 
 
-        Board(std::string filename);
+        Board(std::string board_string);
         ~Board();
 
         char get(Coordinate coord);
@@ -32,12 +31,9 @@ class Board {
         
         void display();
         void display_words();
-    
-        void reset();
 
     private:
         Matrix<char>* boardptr;
-        void build_board(std::string filename);
         void build_words(bool is_across);
 
 };
