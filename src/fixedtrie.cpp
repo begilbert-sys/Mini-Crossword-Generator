@@ -5,6 +5,8 @@ Node* FixedTrie::construct_node() {
     allocated_nodes++;
     node->node_array = nullptr;
     node->char_list = std::string();
+    node->unique = true;
+    node->visited = false;
     return node;
 }
 
@@ -13,6 +15,7 @@ FixedTrie::FixedTrie(int triesize) {
     allocated_nodes = 0;
     allocated_arrays = 0;
     head = construct_node();
+    head->unique = false;
 }
 
 void FixedTrie::destruct_trie(Node* node) {
@@ -46,7 +49,7 @@ void FixedTrie::verify_word(std::string word) {
         throw std::invalid_argument("word: \"" + word +  "\" must be length " + std::to_string(size));
     }
     if (!strutil::islower(word)) {
-        throw std::invalid_argument("word: \"" + word +  "\" must only contain lowercase characters");
+        throw std::invalid_argument("word: \"" + word +  "\" must only contain alphabetic characters");
     }
 }
 
@@ -69,12 +72,13 @@ Node* FixedTrie::add_child(Node* node, char letter) {
 void FixedTrie::add(std::string word) {
     verify_word(word);
     Node* current_node = head;
-    for (char& letter : word) {
+    for (const char& letter : word) {
         int index = letter - 'a';
         if (current_node->node_array == nullptr || current_node->node_array[index] == nullptr) {
             current_node = add_child(current_node, letter);
         } else {
             current_node = current_node->node_array[index];
+            current_node->unique = false;
         }
     }
 }

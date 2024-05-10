@@ -3,6 +3,7 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 #include "solver.h"
 #include "matrix.h"
@@ -13,7 +14,7 @@
 
 using namespace std;
 
-const string DIRECTORY = filesystem::current_path().string();
+const string DIRECTORY = "/Users/bengilbert/Documents/Mini Crossword Generator";
 
 string read_board(string filename) {
     cout << filename << endl;
@@ -34,8 +35,8 @@ string read_board(string filename) {
 
 
 void run() {
-    srand((unsigned) time(NULL));
-    Solver solver(DIRECTORY + "/data/words.txt");
+    //srand((unsigned) time(NULL));
+    Solver solver(DIRECTORY + "/data/words7.txt");
     Board board(read_board(DIRECTORY + "/data/board.txt"));
     auto start = chrono::high_resolution_clock::now();
     solver.solve(board);

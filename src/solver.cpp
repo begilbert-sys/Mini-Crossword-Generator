@@ -43,25 +43,10 @@ Coordinate Solver::next_coordinate(Coordinate coord, Board& board) {
     return {coord.row, coord.column + 1};
 }
 
-Node** node_unhook(Node* node) {
-    if (node->node_array != nullptr && node->char_list.length() == 1) {
-        Node** node_array = node->node_array;
-        node->node_array = nullptr;
-        return node_array;
-    } else {
-        return nullptr;
-    }
-}
-
-void node_rehook(Node* node, Node** node_array) {
-    if (node_array != nullptr) {
-        node->node_array = node_array;
-    }
-}
-
-
 bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
+    
     char original_value = board.get(coord);
+    const NodeBookmark& bookmark = DP.get(coord);
     
     bool final_square = (coord.row == board.rows - 1) && (coord.column == board.columns - 1);
     if (original_value == BLACKOUT) {
@@ -70,25 +55,95 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
         }
         return recur(next_coordinate(coord, board), board, DP);
     }
+      
+    // lambda for gathering info on the previous nodes
+    auto get_prev_node = [&](Board::Direction direction) -> Node* {
+        int word_length = (direction == Board::Direction::ACROSS) ? bookmark.across_word_length : bookmark.down_word_length;
+        // if the current square is NOT the beginning of an across word, assign left_node to the previous letter's node
+        if (word_length == 0) {
+            if (direction == Board::Direction::ACROSS) {
+                return DP.get({coord.row, coord.column - 1}).across;
+            } else {
+                return DP.get({coord.row - 1, coord.column}).down;
+            }
+            
+        } else {
+            // if the current square IS the beginning of an across word. . .
+            // if the length is greater than 2, assign it to the head of a trie
+            if (word_length > 2) {
+                return fixedtrie_array[word_length - WORD_MIN]->head;
+            } else {
+                return nullptr;
+            }
+        }
+    };
 
-    bool across_word = board.is_across_word(coord);
-    bool down_word = board.is_down_word(coord);
-
-    Node* left_node;
-    Node* top_node;
-    if (across_word) {
-        left_node = fixedtrie_array[board.across_words.at(coord).length() - WORD_MIN]->head;
+    
+    Node* left_node = get_prev_node(Board::Direction::ACROSS);
+    Node* top_node = get_prev_node(Board::Direction::DOWN);
+    
+    
+    // lambda sets the square to a specific letter and solves from there
+    auto attempt_solve = [&](char letter) -> bool {
+        int index = letter - 'a';
+        board.set(coord, letter);
+        if (final_square) {
+            return true;
+        }
         
-    } else {
-        left_node = DP.get({coord.row, coord.column - 1}).across;
+        Node* next_left_node = nullptr;
+        if (left_node != nullptr) {
+            next_left_node = left_node->node_array[index];
+            if (next_left_node != nullptr && next_left_node->unique) {
+                if (next_left_node->visited) {
+                    return false;
+                }
+                next_left_node->visited = true;
+            }
+        }
+        Node* next_top_node = nullptr;
+        if (top_node != nullptr) {
+            next_top_node = top_node->node_array[index];
+            if (next_top_node != nullptr && next_top_node->unique) {
+                if (next_top_node->visited) {
+                    if (next_left_node->visited) {
+                        next_left_node->visited = false;
+                    }
+                    return false;
+                }
+                next_top_node->visited = true;
+            }
+        }
+        DP.set(coord, {next_left_node, next_top_node, bookmark.across_word_length, bookmark.down_word_length});
+        bool result = recur(next_coordinate(coord, board), board, DP);
+        
+        // remove blocked nodes
+        if (next_left_node->visited) {
+            next_left_node->visited = false;
+        }
+        if (next_top_node->visited) {
+            next_top_node->visited = false;
+        }
+        return result;
+    };
+    
+    if (top_node == nullptr && left_node == nullptr) {
+        return false;
     }
-    if (down_word) {
-        top_node = fixedtrie_array[board.down_words.at(coord).length() - WORD_MIN]->head;
-    } else {
-        top_node = DP.get({coord.row - 1, coord.column}).down;
+    else if (left_node == nullptr) {
+        for (const char& letter : top_node->char_list) {
+            if (attempt_solve(letter)) {
+                return true;
+            }
+        }
+        return false;
     }
-
-    if (left_node == nullptr || top_node == nullptr || left_node->node_array == nullptr || top_node->node_array == nullptr) {
+    else if (top_node == nullptr) {
+        for (const char& letter : left_node->char_list) {
+            if (attempt_solve(letter)) {
+                return true;
+            }
+        }
         return false;
     }
     
@@ -106,21 +161,9 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
         for (const char& letter : outer_node->char_list) {
             int index = letter - 'a';
             if (inner_node->node_array[index] != nullptr) {
-                board.set(coord, letter);
-                if (final_square) {
+                if (attempt_solve(letter)) {
                     return true;
-                }
-                DP.set(coord, {left_node->node_array[index], top_node->node_array[index]});
-                
-                Node** left_node_array = node_unhook(left_node);
-                Node** top_node_array = node_unhook(left_node);
-                bool result = recur(next_coordinate(coord, board), board, DP);
-                node_rehook(left_node, left_node_array);
-                node_rehook(top_node, top_node_array);
-                
-                if (result) {
-                    return true;
-                }
+                };
             }
         }
     }
@@ -129,19 +172,9 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
         Node* top_node_result = top_node->node_array[index];
         Node* left_node_result = left_node->node_array[index];
         if (top_node_result != nullptr && left_node_result != nullptr) {
-            if (final_square) {
+            if (attempt_solve(original_value)) {
                 return true;
-            }
-            DP.set(coord, {left_node_result, top_node_result});
-            Node** left_node_array = node_unhook(left_node);
-            Node** top_node_array = node_unhook(left_node);
-            bool result = recur(next_coordinate(coord, board), board, DP);
-            node_rehook(left_node, left_node_array);
-            node_rehook(top_node, top_node_array);
-            
-            if (result) {
-                return true;
-            }
+            };
         }
     }
     board.set(coord, original_value);
@@ -149,7 +182,7 @@ bool Solver::recur(Coordinate coord, Board& board, Matrix<NodeBookmark>& DP) {
 }
 
 bool Solver::solve(Board& board) {
-    std::set<std::string> added_words;
+    std::unordered_set<std::string> added_words;
     for (const std::unordered_map<Coordinate, std::string>& wordlist : {board.across_words, board.down_words}) {
         for (auto it = wordlist.begin(); it != wordlist.end(); it++) {
             std::string word = it->second;
@@ -161,13 +194,24 @@ bool Solver::solve(Board& board) {
         }
     }
     Matrix<NodeBookmark> DP(board.rows, board.columns);
+    for (int row = 0; row < board.rows; row++) {
+        for (int col = 0; col < board.columns; col++) {
+            Coordinate coord({row, col});
+            NodeBookmark bookmark;
+            bookmark.across = nullptr;
+            bookmark.down = nullptr;
+            auto across_word_it = board.across_words.find(coord);
+            bookmark.across_word_length = (across_word_it == board.across_words.end()) ? 0 : (int)across_word_it->second.length();
+            auto down_word_it = board.down_words.find(coord);
+            bookmark.down_word_length = (down_word_it == board.down_words.end()) ? 0 : (int)down_word_it->second.length();
+            DP.set(coord, bookmark);
+        }
+    }
+    
     bool result = recur({0, 0}, board, DP);
     for (const std::string& word : added_words) {
         int length = (int)word.length();
         fixedtrie_array[length - WORD_MIN]->remove(word);
     }
-    if (result) {
-        return result;
-    }
-    return false;
+    return result;
 }

@@ -17,6 +17,8 @@ so rather than creating a bunch of empty maps, nullptr can be used.
 struct Node {
     Node** node_array;
     std::string char_list;
+    bool unique;
+    bool visited;
 };
 
 class FixedTrie {

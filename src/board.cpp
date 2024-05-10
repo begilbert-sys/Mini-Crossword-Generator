@@ -1,26 +1,21 @@
 #include "board.h"
 
-void Board::build_words(bool is_across) {
-    if (is_across) {
-        across_words.clear();
-    } else {
-        down_words.clear();
-    }
+void Board::build_words(Direction direction) {
     std::string current_string = "";
     Coordinate current_coord = {0, 0};
     bool reset;
     
-    int primary = is_across ? rows : columns;
-    int secondary = is_across ? columns : rows;
+    int primary = direction == ACROSS ? rows : columns;
+    int secondary = direction == ACROSS ? columns : rows;
     
     for (int p = 0; p < primary; p++) {
         reset = true;
         for (int s = 0; s < secondary; s++) {
-            int row = is_across ? p : s;
-            int col = is_across ? s : p;
+            int row = direction == ACROSS ? p : s;
+            int col = direction == ACROSS ? s : p;
             if (reset) {
                 if (!current_string.empty()) {
-                    if (is_across) {
+                    if (direction == ACROSS) {
                         across_words[current_coord] = current_string;
                     } else {
                         down_words[current_coord] = current_string;
@@ -39,10 +34,7 @@ void Board::build_words(bool is_across) {
         }
     }
     if (!current_string.empty()) {
-        if (!strutil::contains(current_string, BLANK)) {
-            current_string = strutil::toupper(current_string);
-        }
-        if (is_across) {
+        if (direction == ACROSS) {
             across_words[current_coord] = current_string;
         } else {
             down_words[current_coord] = current_string;
@@ -64,13 +56,12 @@ Board::Board(std::string board_string) {
                 break;
 
             case '\n':
-                std::cout << rowstr << std::endl;
                 contents.push_back(rowstr);
                 rowstr = "";
                 break;
 
             default:
-                if (!islower(c)) {
+                if (!(std::islower(c))) {
                     throw new std::logic_error(std::string("\"") + c + "\" is not a valid letter");
                 }
                 rowstr += c;
@@ -92,8 +83,8 @@ Board::Board(std::string board_string) {
             set({row, col}, contents[row][col]);
         }
     }
-    build_words(true);
-    build_words(false);
+    build_words(ACROSS);
+    build_words(DOWN);
 }
 
 Board::~Board() {

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <fstream>
-#include <set>
+#include <unordered_set>
 
 #include "fixedtrie.h"
 #include "matrix.h"
@@ -25,6 +25,9 @@ private:
     struct NodeBookmark {
         Node* across;
         Node* down;
+        int across_word_length;
+        int down_word_length;
+        
     };
 
     FixedTrie* fixedtrie_array[FIXEDTRIES];
