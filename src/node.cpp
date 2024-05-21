@@ -1,8 +1,8 @@
 //
-//  solver.cpp
+//  trienode.cpp
 //  Mini Crossword Generator
 //
 //  Created by Benjamin Gilbert on 5/19/24.
 //
 
-#include "solver.hpp"
+#include "trienode.hpp"
