@@ -7,41 +7,54 @@
 #include <vector>
 #include <cctype>
 
+#include "globals.h"
 #include "matrix.h"
 #include "utils/strutil.h"
 
-#define BLANK '_'
-#define BLACKOUT '.'
-
 class Board {
-    public:
-        enum Direction {
-            ACROSS,
-            DOWN
-        };
+public:
+
+    int rows;
+    int columns;
     
-        int rows;
-        int columns;
-        std::unordered_map<Coordinate, std::string> across_words;
-        std::unordered_map<Coordinate, std::string> down_words;
+    Matrix<int>* across_indices;
+    Matrix<int>* down_indices;
 
 
-        Board(std::string board_string);
-        ~Board();
+    Board(std::string board_string);
+    ~Board();
+    
+    char get(Coordinates coords);
+    void set(Coordinates coords, char letter);
 
-        char get(Coordinate coord);
-        void set(Coordinate coord, char letter);
+    std::vector<std::string> get_wordlist(Direction direction);
+    
+    int get_word_index(Coordinates coords, Direction direction);
+    
+    int get_word_length(Coordinates coords, Direction direction);
+    
+    std::string to_string();
+    
+    void display();
 
-        bool is_across_word(Coordinate coord);
-        bool is_down_word(Coordinate coord);
-        
-        void display();
-        void display_words();
+    void display_words();
 
-    private:
-        Matrix<char>* boardptr;
-        void build_words(Direction direction);
+private:
+    std::vector<std::string> across_words;
+    std::vector<std::string> down_words;
+    
+    /* this has to be a pointer because idk the size at compile time */
+    Matrix<char>* board;
+    
+    /* keeps track of which across word and down word each
+     square is a part of
+     */
 
+    
+    void build_board(std::string board_string);
+    
+    /* assign each square its word index  */
+    void build_words(Direction direction);
 };
 
 #endif

@@ -9,6 +9,10 @@ The [Mini Crossword](https://www.nytimes.com/crosswords/game/mini) is a crosswor
 Generated boards can be customized, pre-filled with letters, and are guaranteed to have no repeated words. 
 
 ## How to run
+In the same directory, you may type:
+```make```
+and then
+```./main```
 As of right now, this program only works on the command-line, but I'm working on an [in-browser](https://github.com/begilbert-sys/make-your-own-crossy) version using TypeScript. 
 
 The program only uses alphabetical words between lengths 3 and 8. Anything else will be ignored (see [Limitations](#limitations) if you'd like to change this).

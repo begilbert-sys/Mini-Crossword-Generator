@@ -2,7 +2,7 @@ FLAGS := -std=c++17 -Wall -Wextra -O3
 srcdir := ./src
 outdir := ./out
 
-OBJECTS := $(outdir)/strutil.o $(outdir)/randutil.o $(outdir)/fixedtrie.o $(outdir)/board.o $(outdir)/solver.o
+OBJECTS := $(outdir)/strutil.o $(outdir)/randutil.o $(outdir)/node.o $(outdir)/boardtries.o $(outdir)/board.o $(outdir)/solver.o
 
 main: $(outdir)/main.o
 	g++ $(FLAGS) $(outdir)/main.o $(OBJECTS) -o main

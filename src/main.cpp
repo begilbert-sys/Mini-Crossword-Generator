@@ -6,10 +6,8 @@
 #include <thread>
 
 #include "solver.h"
-#include "matrix.h"
-#include "fixedtrie.h"
 #include "board.h"
-#include "utils/randutil.h"
+#include "boardtries.h"
 
 
 using namespace std;
@@ -35,15 +33,16 @@ string read_board(string filename) {
 
 
 void run() {
-    //srand((unsigned) time(NULL));
-    Solver solver(DIRECTORY + "/data/words7.txt");
-    Board board(read_board(DIRECTORY + "/data/board.txt"));
-    auto start = chrono::high_resolution_clock::now();
-    solver.solve(board);
-    auto end = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-    board.display();
-    cout << "Elapsed time: " << duration.count() << "ms" << endl;
+    srand((unsigned) time(NULL));
+    //Board board(read_board(DIRECTORY + "/data/board.txt"));
+    //auto start = chrono::high_resolution_clock::now();
+    //auto end = chrono::high_resolution_clock::now();
+    //auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    //BoardTries(board, DIRECTORY + "/data/words.txt");
+    string board_string = read_board(DIRECTORY + "/data/board.txt");
+    string solved_string = Solver::solve(board_string, DIRECTORY + "/data/words.txt");
+    cout << solved_string << endl;
+    //cout << "Elapsed time: " << duration.count() << "ms" << endl;
 }
 
 int main() {
