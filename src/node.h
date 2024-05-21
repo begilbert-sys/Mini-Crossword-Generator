@@ -44,7 +44,7 @@ public:
     
     /* gets the next Node or nullptr if it's not accessible */
     
-    Node* get_next_node(char letter, int word_index, Direction word_direction);
+    Node* get_next_node(char letter);
     
     bool is_path_allowed(int word_index, Direction word_direction);
     

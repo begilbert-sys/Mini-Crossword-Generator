@@ -54,10 +54,7 @@ void Node::set_gateway_bits(Direction direction, unsigned short gateway_bits) {
     }
 }
 
-Node* Node::get_next_node(char letter, int word_index, Direction word_direction) {
-    if (!is_path_allowed(word_index, word_direction)) {
-        return nullptr;
-    }
+Node* Node::get_next_node(char letter) {
     int index = letter - 'a';
     if (index > static_cast<int>(node_vec.size() - 1)) {        
         return nullptr;

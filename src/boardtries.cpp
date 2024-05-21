@@ -86,18 +86,6 @@ Node* BoardTries::get_head(int word_length) {
     return fixedtries[trie_index];
 }
 
-bool BoardTries::contains(std::string word) {
-    int word_length = static_cast<int>(word.length());
-    Node* current_node = get_head(word_length);
-    for (const char& c : word) {
-        current_node = current_node->get_next_node(c, 5, DOWN);
-        if (current_node == nullptr) {
-            return false;
-        }
-    }
-    return true;
-}
-
 unsigned short BoardTries::generate_gateway_bits(std::vector<std::string> board_words, const std::string& word) {
     unsigned short gateway_bits = 0b0;
     for (size_t i = 0; i < board_words.size(); i++) {

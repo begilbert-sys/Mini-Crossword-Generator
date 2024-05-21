@@ -14,7 +14,6 @@ public:
     BoardTries(Board& board, std::string wordbank_filename);
     ~BoardTries();
     Node* get_head(int word_length);
-    bool contains(std::string word);
     
 private:
     Node* fixedtries[FIXEDTRIES];

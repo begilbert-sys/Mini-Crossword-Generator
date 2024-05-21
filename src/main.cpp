@@ -33,7 +33,11 @@ string read_board(string filename) {
 
 
 void run() {
+    // delete this line to use the same random seed every time (useful for benchmarking)
     srand((unsigned) time(NULL));
+    
+    
+    
     //Board board(read_board(DIRECTORY + "/data/board.txt"));
     //auto start = chrono::high_resolution_clock::now();
     //auto end = chrono::high_resolution_clock::now();
@@ -46,6 +50,8 @@ void run() {
 }
 
 int main() {
+    run();
+    /*
     try {
         run();
         cout << "Program exited successfully" << endl;
@@ -54,4 +60,5 @@ int main() {
         cerr << "AN ERROR OCCURRED:\n" << e.what() << endl;
         return EXIT_FAILURE;
     }
+     */
 }

@@ -65,6 +65,7 @@ void Board::build_words(Direction direction) {
     std::string current_string = "";
     Coordinates current_coordinates = {0, 0};
     int current_index = 0;
+    bool index_disabled = false;
     
     bool reset;
     
@@ -78,11 +79,11 @@ void Board::build_words(Direction direction) {
     for (int p = 0; p < primary; p++) {
         reset = true;
         for (int s = 0; s < secondary; s++) {
-            int row = direction == ACROSS ? p : s;
-            int col = direction == ACROSS ? s : p;
+            int row = (direction == ACROSS) ? (p) : (s);
+            int col = (direction == ACROSS) ? (s) : (p);
             current_coordinates = {row, col};
             if (reset) {
-                if (!current_string.empty()) {
+                if (current_string.length() > 2) {
                     if (direction == ACROSS) {
                         across_words.push_back(current_string);
                         current_index++;
@@ -93,6 +94,16 @@ void Board::build_words(Direction direction) {
                 }
                 current_string = "";
                 reset = false;
+                
+                
+                // if the next three letters aren't free, then it's not a word. disable it.
+                // this code block is kind of cancer. I'm sorry.
+                if (direction == ACROSS) {
+                    index_disabled = (col + 3 > columns) || (get({row, col + 1}) == BLACKOUT) || (get({row, col + 2}) == BLACKOUT);
+                } else {
+                    index_disabled = (row + 3 > rows) || (get({row + 1, col}) == BLACKOUT) || (get({row + 2, col}) == BLACKOUT);
+                }
+                
             }
             char letter = board->get(current_coordinates);
             if (letter == BLACKOUT) {
@@ -101,10 +112,15 @@ void Board::build_words(Direction direction) {
             }
             
             current_string += letter;
-            indices->set(current_coordinates, current_index);
+            if (index_disabled) {
+                // this occurs with words of less than length 3
+                indices->set(current_coordinates, -1);
+            } else {
+                indices->set(current_coordinates, current_index);
+            }
         }
     }
-    if (!current_string.empty()) {
+    if (current_string.length() > 2) {
         if (direction == ACROSS) {
             across_words.push_back(current_string);
         } else {
@@ -132,10 +148,18 @@ int Board::get_word_index(Coordinates coords, Direction direction) {
 int Board::get_word_length(Coordinates coords, Direction direction) {
     size_t word_length;
     if (direction == ACROSS) {
-        word_length = across_words.at(across_indices->get(coords)).size();
+        int indices = across_indices->get(coords);
+        if (indices == -1) {
+            return -1;
+        }
+        word_length = across_words.at(indices).size();
     }
     else {
-        word_length = down_words.at(down_indices->get(coords)).size();
+        int indices = down_indices->get(coords);
+        if (indices == -1) {
+            return -1;
+        }
+        word_length = down_words.at(indices).size();
     }
     return static_cast<int>(word_length);
 }
@@ -179,4 +203,15 @@ void Board::display_words() {
     for (const std::string& word : down_words) {
         std::cout << word << std::endl;
     }
+}
+
+void Board::display_indices(Direction direction) {
+    Matrix<int>* indices = (direction == ACROSS) ? (across_indices) : (down_indices);
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < columns; col++) {
+            std::cout << indices->get({row, col}) << " ";
+        }
+        std::cout << std::endl;
+    }
+    
 }

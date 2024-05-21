@@ -35,9 +35,10 @@ public:
     
     std::string to_string();
     
+    // these are for debugging purposes
     void display();
-
     void display_words();
+    void display_indices(Direction direction);
 
 private:
     std::vector<std::string> across_words;

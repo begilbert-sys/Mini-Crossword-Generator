@@ -38,8 +38,8 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
     // lambda for retrieving the left/top cached nodes
     auto get_prev_node = [&](Direction direction) -> Node* {
         int word_length = (direction == ACROSS) ? (across_length) : (down_length);
-        if (word_length < WORD_MIN) {
-            // if the word is less than length 2, just ignore it
+        if (word_length == -1) {
+            // this means the word length is less than 3 and should be ignored
             return nullptr;
         }
         if ((direction == ACROSS && coords.column == 0) || (direction == DOWN && coords.row == 0)) {
@@ -57,6 +57,10 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
     Node* left_node = get_prev_node(ACROSS);
     Node* top_node = get_prev_node(DOWN);
     
+    if ((across_index != -1 && !left_node->is_path_allowed(across_index, ACROSS)) ||
+        (down_index != -1 && !top_node->is_path_allowed(down_index, DOWN))) {
+        return false;
+    }
     
     // this lambda sets the square to a specific letter and solves from there
     auto attempt_solve = [&](char letter) -> bool {
@@ -68,7 +72,7 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
         
         Node* next_left_node = nullptr;
         if (left_node != nullptr) {
-            next_left_node = left_node->get_next_node(letter, across_index, ACROSS);
+            next_left_node = left_node->get_next_node(letter);
             if (next_left_node->unique) {
                 if (next_left_node->visited) {
                     return false;
@@ -78,10 +82,10 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
         }
         Node* next_top_node = nullptr;
         if (top_node != nullptr) {
-            next_top_node = top_node->get_next_node(letter, down_index, DOWN);
+            next_top_node = top_node->get_next_node(letter);
             if (next_top_node->unique) {
                 if (next_top_node->visited) {
-                    if (next_left_node->visited) {
+                    if (left_node != nullptr && next_left_node->visited) {
                         next_left_node->visited = false;
                     }
                     return false;
@@ -93,17 +97,16 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
         node_cache.set(coords, {next_left_node, next_top_node});
         bool result = recur(next_coordinate(coords, board), board, boardtries, node_cache);
         // remove blocked nodes
-        if (next_left_node->visited) {
+        if (left_node != nullptr && next_left_node->visited) {
             next_left_node->visited = false;
         }
-        if (next_top_node->visited) {
+        if (top_node != nullptr && next_top_node->visited) {
             next_top_node->visited = false;
         }
         return result;
     };
     
     if (top_node == nullptr && left_node == nullptr) {
-        
         return false;
     }
     else if (left_node == nullptr) {
@@ -128,8 +131,7 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
     if (original_value == BLANK) {
         if (left_node->char_list.length() > top_node->char_list.length()) {
             for (const char& letter : top_node->char_list) {
-                if (top_node->is_path_allowed(down_index, DOWN) &&
-                    left_node->get_next_node(letter, across_index, ACROSS) != nullptr) {
+                if (left_node->get_next_node(letter) != nullptr) {
                     if (attempt_solve(letter)) {
                         return true;
                     };
@@ -138,9 +140,7 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
             
         } else {
             for (const char& letter : left_node->char_list) {
-                
-                if (left_node->is_path_allowed(across_index, ACROSS) &&
-                    top_node->get_next_node(letter, down_index, DOWN) != nullptr) {
+                if (top_node->get_next_node(letter) != nullptr) {
                     if (attempt_solve(letter)) {
                         return true;
                     };
@@ -149,8 +149,8 @@ bool recur(Coordinates coords, Board& board, BoardTries& boardtries, Matrix<Cach
         }
     }
     else {
-        if (left_node->get_next_node(original_value, across_index, ACROSS) != nullptr &&
-            top_node->get_next_node(original_value, down_index, DOWN)) {
+        if (left_node->get_next_node(original_value) != nullptr &&
+            top_node->get_next_node(original_value) != nullptr) {
             if (attempt_solve(original_value)) {
                 return true;
             };
